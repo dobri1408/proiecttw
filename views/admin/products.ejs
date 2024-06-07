@@ -1,0 +1,71 @@
+<%- include("../includes/head.ejs") %>
+<link rel="stylesheet" href="/css/product.css">
+
+
+</head>
+
+<body>
+    <%- include("../includes/navigation.ejs") %>
+    <main>
+        <% if(prods.length > 0) { %>
+            <div class="grid admin_grid">
+                <% for(let product of prods) { %>
+                    <article class="card product-item">
+                        <div class="card__image">
+                            <!-- Initially show a loading image, then fetch the actual image -->
+                            <img src="<%= product.imageUrl %>" data-src="<%= product.imageUrl %>" alt="<%= product.title %>" />
+                        </div>
+                        <div class="card__content">
+                            <p class="product__title"><%= product.title %></p>
+                            <h3 class="product__price">$ <%= product.price %></h3>
+                        </div>
+                        <div class="card__actions">
+                            <a href="/admin/edit-product/<%= product._id %>?edit=true" class="btn">Edit</a>
+                            <button onclick="deleteProduct(this)" class="btn danger" type="button"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </article>
+                <% } %>
+            </div>
+        <% } else { %>
+            <h1>No Products</h1>
+        <% } %>
+    </main>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+        const images = document.querySelectorAll('img');
+        console.log({images})
+        images.forEach(img => {
+            const imageUrl = img.getAttribute('src');
+            console.log(imageUrl);
+            fetch(imageUrl)
+                .then(response => response.blob())
+                .then(blob => {
+                    const reader = new FileReader();
+                    reader.onloadend = function() {
+                        img.src = reader.result;
+                    }
+                    reader.readAsDataURL(blob);
+                })
+                .catch(error => console.error('Error loading the image:', error));
+        });
+        const products = document.querySelectorAll('.product-item');
+
+        products.forEach(product => {
+            product.classList.toggle("expanded");
+            showComputedStyle(product);
+        })
+    });
+
+    function showComputedStyle(element) {
+        const computedStyle = getComputedStyle(element);
+        console.log(`Background color of clicked product is ${computedStyle.backgroundColor}`);
+       
+    }
+
+
+        </script>
+    <script src="/js/admin_client.js"></script>
+   
+    <%- include("../includes/end.ejs") %>
+</body>
+</html>

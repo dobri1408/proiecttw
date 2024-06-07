@@ -1,0 +1,104 @@
+<%- include('../includes/head.ejs') %>
+<link rel="stylesheet" href="/css/forms.css">
+<link rel="stylesheet" href="/css/auth.css">
+</head>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const greetingContainer = document.getElementById('greeting');
+    const tipsContainer = document.getElementById('passwordTips');
+    console.log("intru")
+    function updateGreetingAndTips() {
+        const hours = new Date().getHours();
+      
+        const greeting = hours < 12 ? "Good morning" : hours < 18 ? "Good afternoon" : "Good evening";
+
+        greetingContainer.innerText = `${greeting.charAt(0).toUpperCase() + greeting.slice(1)}! Welcome to our site.`;
+    
+    }
+
+    // Update greeting and tips every hour in case the page is left open
+    updateGreetingAndTips();
+    setInterval(updateGreetingAndTips, 3600000); // 3600000 milliseconds = 1 hour
+    })
+    
+    </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const form = document.querySelector('.login-form');
+    let autoSaveInterval;
+
+    function saveFormData() {
+        localStorage.setItem('email', emailInput.value);
+        localStorage.setItem('password', passwordInput.value);
+        localStorage.setItem('confirmPassword', confirmPasswordInput.value);
+    }
+
+    // Restore saved data from localStorage
+    emailInput.value = localStorage.getItem('email') || '';
+    passwordInput.value = localStorage.getItem('password') || '';
+    confirmPasswordInput.value = localStorage.getItem('confirmPassword') || '';
+
+    // Initiate auto-save every 10 seconds
+    autoSaveInterval = setInterval(saveFormData, 10000);
+
+    // Display a message shortly after data is loaded to inform the user
+    setTimeout(() => {
+        if (emailInput.value || passwordInput.value || confirmPasswordInput.value) {
+            alert('Form data restored. Continue signing up!');
+        }
+    }, 500);
+
+    // Clear the interval when form is submitted to stop auto-saving
+    form.addEventListener('submit', function(e) {
+        clearInterval(autoSaveInterval);
+        localStorage.removeItem('email');
+        localStorage.removeItem('password');
+        localStorage.removeItem('confirmPassword');
+        // Prevent form submission if not confirmed (example logic)
+        if (!confirm('Submit the form?')) {
+            e.preventDefault();
+        }
+    });
+
+    // Additional form controls can listen for changes and update localStorage
+    emailInput.addEventListener('input', saveFormData);
+    passwordInput.addEventListener('input', saveFormData);
+    confirmPasswordInput.addEventListener('input', saveFormData);
+});
+    </script>
+<body>
+    <%- include('../includes/navigation.ejs') %>
+
+    <main>
+        <% if (errorMessage.length > 0) { %>
+       
+        <div class="user-message user-message--error"><i class="fas fa-exclamation-circle"></i> <%= errorMessage %>
+        </div>
+        <% } %>
+
+        <form class="login-form" action="/signup" method="POST" novalidate>
+            <h1 class="form__title">SIGN UP</h1>
+            <div id="greeting" class="greeting-message"></div>
+            <div class="form-control">
+                <label for="email">E-Mail</label>
+                <input class="<%= validationErrors.find(e=>e.param==="email") ? "invalid" : "" %>"
+                    value="<%= oldInput.email %>" type="email" name="email" id="email">
+            </div>
+            <div class="form-control">
+                <label for="password">Password</label>
+                <input class="<%= validationErrors.find(e=>e.param==="password") ? "invalid" : "" %>"
+                    value="<%= oldInput.password %>" type="password" name="password" id="password">
+            </div>
+            <div class="form-control">
+                <label for="confirmPassword">Confirm Password</label>
+                <input class="<%= validationErrors.find(e=>e.param==="confirmPassword") ? "invalid" : "" %>"
+                    value="<%= oldInput.confirmPassword %>" type="password" name="confirmPassword" id="confirmPassword">
+            </div>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn" type="submit">Sign Up</button>
+        </form>
+    </main>
+    <%- include('../includes/end.ejs') %>
